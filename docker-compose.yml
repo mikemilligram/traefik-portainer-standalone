@@ -1,0 +1,75 @@
+version: "3.8"
+services:
+  traefik:
+    container_name: traefik
+    image: traefik
+    restart: always
+    ports:
+      - 80:80
+      - 443:443
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=traefik-proxy
+      - traefik.http.middlewares.admin.basicauth.usersfile=/users/traefik
+      - traefik.http.middlewares.https-redirect.redirectscheme.scheme=https
+      - traefik.http.middlewares.https-redirect.redirectscheme.permanent=true
+      - traefik.http.routers.traefik-http.rule=Host(`traefik.${DOMAIN}`)
+      - traefik.http.routers.traefik-http.entrypoints=http
+      - traefik.http.routers.traefik-http.middlewares=https-redirect
+      - traefik.http.routers.traefik-https.rule=Host(`traefik.${DOMAIN}`)
+      - traefik.http.routers.traefik-https.entrypoints=https
+      - traefik.http.routers.traefik-https.tls=true
+      - traefik.http.routers.traefik-https.tls.certresolver=le
+      - traefik.http.routers.traefik-https.service=api@internal
+      - traefik.http.routers.traefik-https.middlewares=admin
+      - traefik.http.services.traefik.loadbalancer.server.port=8080
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - traefik-certificates:/certificates
+      - /data/traefik/users:/users:ro
+    command:
+      - --providers.docker=true
+      - --providers.docker.exposedbydefault=false
+      - --entrypoints.http.address=:80
+      - --entrypoints.https.address=:443
+      - --certificatesresolvers.le.acme.email=${EMAIL}
+      - --certificatesresolvers.le.acme.storage=/certificates/acme.json
+      - --certificatesresolvers.le.acme.tlschallenge=true
+      - --accesslog
+      - --log
+      - --api
+    networks:
+      - traefik-proxy
+  
+  portainer:
+    image: portainer/portainer-ce:latest
+    container_name: portainer
+    restart: always
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=traefik-proxy
+      - traefik.http.middlewares.portainer-https-redirect.redirectscheme.scheme=https
+      - traefik.http.middlewares.portainer-https-redirect.redirectscheme.permanent=true
+      - traefik.http.routers.portainer-http.rule=Host(`portainer.${DOMAIN}`)
+      - traefik.http.routers.portainer-http.entrypoints=http
+      - traefik.http.routers.portainer-http.middlewares=portainer-https-redirect
+      - traefik.http.routers.portainer-https.rule=Host(`portainer.${DOMAIN}`)
+      - traefik.http.routers.portainer-https.entrypoints=https
+      - traefik.http.routers.portainer-https.tls=true
+      - traefik.http.routers.portainer-https.tls.certresolver=le
+      - traefik.http.services.portainer.loadbalancer.server.port=9000
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
+    networks:
+      - traefik-proxy
+
+volumes:
+  traefik-certificates:
+    name: traefik-certificates
+  portainer_data:
+    name: portainer_data
+
+networks:
+  traefik-proxy:
+    name: traefik-proxy
