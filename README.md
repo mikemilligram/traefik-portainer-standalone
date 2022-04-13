@@ -38,9 +38,9 @@ Additionally, if you want to use https, add:
 
 If you need http authentication, add:
 
-    - traefik.http.routers.my-service-http.middlewares=auth 
+    - traefik.http.routers.my-service-http.middlewares=admin
 
 <u>OR</u>, if you are using https, add:
 
-    - traefik.http.routers.my-service-https.middlewares=auth
+    - traefik.http.routers.my-service-https.middlewares=admin
       
