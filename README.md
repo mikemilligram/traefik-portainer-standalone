@@ -32,11 +32,9 @@ Additionally, if you want to use https, add:
 
     - traefik.http.routers.my-service-https.entrypoints=https
     - traefik.http.routers.my-service-https.rule=Host(`service.your-domain.com`)
-    - traefik.http.routers.portainer-https.tls=true
+    - traefik.http.routers.my-service-https.tls=true
     - traefik.http.routers.my-service-https.tls.certresolver=le
-    - traefik.http.routers.my-service-http.middlewares=my-service-https-redirect
-    - traefik.http.middlewares.my-service-https-redirect.redirectscheme.scheme=https
-    - traefik.http.middlewares.my-service-https-redirect.redirectscheme.permanent=true
+    - traefik.http.routers.my-service-http.middlewares=https-redirect
 
 If you need http authentication, add:
 
