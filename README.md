@@ -20,7 +20,7 @@ To make any service use traefik, add it to the `traefik-proxy` network and add t
 
     - traefik.enable=true
     - traefik.docker.network=traefik-proxy
-    - traefik.http.routers.my-service-https.entrypoints=http
+    - traefik.http.routers.my-service-http.entrypoints=http
     - traefik.http.routers.my-service-http.rule=Host(`service.your-domain.com`)
     - traefik.http.services.my-service.loadbalancer.server.port=your-port-here
       
